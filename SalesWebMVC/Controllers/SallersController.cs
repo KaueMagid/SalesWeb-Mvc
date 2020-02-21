@@ -32,6 +32,22 @@ namespace SalesWebMVC.Controllers
             var sallerViewModel = new SallerFormViewModel { Departaments = departaments };
             return View(sallerViewModel);
         }
+        public IActionResult Delete(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var obj = _sallerservice.FindById(id.Value);
+
+            if (obj == null)
+            {
+                return NotFound();
+            }
+
+            return View(obj);
+        }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -40,5 +56,13 @@ namespace SalesWebMVC.Controllers
             _sallerservice.Insert(saller);
             return RedirectToAction(nameof(Index));
         }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Delete(int id)
+        {
+            _sallerservice.Remove(id);
+            return RedirectToAction(nameof(Index));
+        }
+
     }
 }

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using SalesWebMVC.Services;
+using SalesWebMVC.Services.Exceptions;
 using SalesWebMVC.Models;
 using SalesWebMVC.Models.ViewModel;
 
@@ -49,6 +50,41 @@ namespace SalesWebMVC.Controllers
             return View(obj);
         }
 
+        public IActionResult Details(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var obj = _sallerservice.FindById(id.Value);
+
+            if (obj == null)
+            {
+                return NotFound();
+            }
+
+            return View(obj);
+        }
+        public IActionResult Edit(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var obj = _sallerservice.FindById(id.Value);
+
+            if (obj == null)
+            {
+                return NotFound();
+            }
+
+            List<Departament> departaments = _departamentService.FindAll();
+            var sallerViewModel = new SallerFormViewModel { Departaments = departaments,Saller = obj };
+            return View(sallerViewModel);
+        }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Create(Saller saller)
@@ -63,6 +99,29 @@ namespace SalesWebMVC.Controllers
             _sallerservice.Remove(id);
             return RedirectToAction(nameof(Index));
         }
+        
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Edit(int id, Saller saller)
+        {
+            if (id != saller.Id)
+            {
+                return BadRequest();
+            }
+            try
+            {
+                _sallerservice.Update(saller);
+                return RedirectToAction(nameof(Index));
+            }
+            catch (NotFoundException)
+            {
+                return NotFound();
+            }
+            catch (DbConcurrencyException)
+            {
+                return BadRequest();
+            }
 
+        }
     }
 }

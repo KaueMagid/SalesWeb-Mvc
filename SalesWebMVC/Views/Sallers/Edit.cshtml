@@ -9,25 +9,29 @@
     <div class="col-md-4">
         <form asp-action="Edit">
             <input type="hidden" asp-for="Saller.Id" />
+            <div asp-validation-summary="All" class="text-danger"></div>
             <div class="form-group">
                 <label asp-for="Saller.Name" class="control-label"></label>
                 <input asp-for="Saller.Name" class="form-control" />
+                <span asp-validation-for="Saller.Name" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="Saller.Email" class="control-label"></label>
                 <input asp-for="Saller.Email" class="form-control" />
+                <span asp-validation-for="Saller.Email" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="Saller.BirthDate" class="control-label"></label>
                 <input asp-for="Saller.BirthDate" class="form-control" />
+                <span asp-validation-for="Saller.BirthDate" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="Saller.BaseSalary" class="control-label"></label>
                 <input asp-for="Saller.BaseSalary" class="form-control" />
-            </div>
-            <div class="form-group">
+                <span asp-validation-for="Saller.BaseSalary" class="text-danger"></span>
+            </div><div class="form-group">
                 <label asp-for="Saller.Departament" class="control-label"></label>
-                <select asp-for="Saller.DepartamentId" asp-items="@(new SelectList(Model.Departaments,"Id","Name"))" 
+                <select asp-for="Saller.DepartamentId" asp-items="@(new SelectList(Model.Departaments,"Id","Name"))"
                         class="form-control"></select>
             </div>
             <div class="form-group">
@@ -36,4 +40,6 @@
         </form>
     </div>
 </div>
-
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

@@ -12,5 +12,15 @@ namespace SalesWebMVC.Controllers
         {
             return View();
         }
+
+        public IActionResult SimpleSearch()
+        {
+            return View();
+        }
+
+        public IActionResult GroupSearch()
+        {
+            return View();
+        }
     }
 }

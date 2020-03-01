@@ -1,10 +1,12 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
+using System.Threading.Tasks;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using SalesWebMVC.Services;
 using SalesWebMVC.Models;
 using SalesWebMVC.Models.ViewModel;
-using System;
+using SalesWebMVC.Services.Exceptions;
 
 namespace SalesWebMVC.Controllers
 {
@@ -19,108 +21,115 @@ namespace SalesWebMVC.Controllers
             _departamentService = departamentService;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            var list = _sallerservice.FindAll();
+            var list = await _sallerservice.FindAllAsync();
             return View(list);
         }
 
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            var departaments = _departamentService.FindAll();
+            var departaments = await _departamentService.FindAllAsync();
             var sallerViewModel = new SallerFormViewModel { Departaments = departaments };
             return View(sallerViewModel);
         }
-        public IActionResult Delete(int? id)
+        public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
             {
-                return RedirectToAction(nameof(Error), new {message = "Id not provided"});
+                return RedirectToAction(nameof(Error), new { message = "Id not provided" });
             }
 
-            var obj = _sallerservice.FindById(id.Value);
+            var obj = await _sallerservice.FindByIdAsync(id.Value);
 
             if (obj == null)
             {
-                return RedirectToAction(nameof(Error), new {message = "Id not Found"});
+                return RedirectToAction(nameof(Error), new { message = "Id not Found" });
             }
 
             return View(obj);
         }
 
-        public IActionResult Details(int? id)
+        public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
             {
-                return RedirectToAction(nameof(Error), new {message = "Id not provided"});
+                return RedirectToAction(nameof(Error), new { message = "Id not provided" });
             }
 
-            var obj = _sallerservice.FindById(id.Value);
+            var obj = await _sallerservice.FindByIdAsync(id.Value);
 
             if (obj == null)
             {
-                return RedirectToAction(nameof(Error), new {message = "Id not found"});
+                return RedirectToAction(nameof(Error), new { message = "Id not found" });
             }
 
             return View(obj);
         }
-        public IActionResult Edit(int? id)
+        public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
             {
-                return RedirectToAction(nameof(Error), new {message = "Id not provided"});
+                return RedirectToAction(nameof(Error), new { message = "Id not provided" });
             }
 
-            var obj = _sallerservice.FindById(id.Value);
+            var obj = await _sallerservice.FindByIdAsync(id.Value);
 
             if (obj == null)
             {
-                return RedirectToAction(nameof(Error), new {message = "Id not found"});
+                return RedirectToAction(nameof(Error), new { message = "Id not found" });
             }
 
-            List<Departament> departaments = _departamentService.FindAll();
+            List<Departament> departaments = await _departamentService.FindAllAsync();
             var sallerViewModel = new SallerFormViewModel { Departaments = departaments, Saller = obj };
             return View(sallerViewModel);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Create(Saller saller)
+        public async Task<IActionResult> Create(Saller saller)
         {
             if (!ModelState.IsValid)
             {
-                var departaments = _departamentService.FindAll();
+                var departaments = await _departamentService.FindAllAsync();
                 var viewModel = new SallerFormViewModel { Departaments = departaments, Saller = saller };
                 return View(viewModel);
             }
-            _sallerservice.Insert(saller);
+            await _sallerservice.InsertAsync(saller);
             return RedirectToAction(nameof(Index));
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            _sallerservice.Remove(id);
-            return RedirectToAction(nameof(Index));
+            try
+            {
+                await _sallerservice.RemoveAsync(id);
+                return RedirectToAction(nameof(Index));
+            }
+            catch (IntegrityException e)
+            {
+                return RedirectToAction(nameof(Error), e.Message);
+            }
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(int id, Saller saller)
+        public async Task<IActionResult> Edit(int id, Saller saller)
         {
             if (!ModelState.IsValid)
             {
-                var departaments = _departamentService.FindAll();
+                var departaments = await _departamentService.FindAllAsync();
                 var viewModel = new SallerFormViewModel { Departaments = departaments, Saller = saller };
                 return View(viewModel);
             }
             if (id != saller.Id)
             {
-                return RedirectToAction(nameof(Error), new {message = "Id mismatch"});
+                return RedirectToAction(nameof(Error), new { message = "Id mismatch" });
             }
             try
             {
-                _sallerservice.Update(saller);
+                await _sallerservice.Update(saller);
                 return RedirectToAction(nameof(Index));
             }
             catch (ApplicationException e)
@@ -128,7 +137,7 @@ namespace SalesWebMVC.Controllers
                 return RedirectToAction(nameof(Error), e.Message);
 
             }
-            
+
         }
         public IActionResult Error(string message)
         {
